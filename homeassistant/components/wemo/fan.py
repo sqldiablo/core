@@ -6,6 +6,8 @@ import logging
 import async_timeout
 import voluptuous as vol
 
+from pywemo import ouimeaux_device.ActionException
+
 from homeassistant.components.fan import (
     SPEED_HIGH,
     SPEED_LOW,
@@ -128,7 +130,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     # Register service(s)
     hass.services.async_register(
-        WEMO_DOMAIN, SERVICE_SET_HUMIDITY, service_handle, schema=SET_HUMIDITY_SCHEMA
+        WEMO_DOMAIN,
+        SERVICE_SET_HUMIDITY,
+        service_handle,
+        schema=SET_HUMIDITY_SCHEMA,
     )
 
     hass.services.async_register(
@@ -293,32 +298,68 @@ class WemoHumidifier(FanEntity):
 
     def turn_on(self, speed: str = None, **kwargs) -> None:
         """Turn the switch on."""
-        if speed is None:
-            self.wemo.set_state(self._last_fan_on_mode)
-        else:
-            self.set_speed(speed)
+        try:
+            if speed is None:
+                self.wemo.set_state(self._last_fan_on_mode)
+            else:
+                self.set_speed(speed)
+        except ActionException as err:
+            _LOGGER.warning("Error while turning on device %s. Error: %s",
+                self.name
+                , err,
+            )
+            self._available = False
+
 
     def turn_off(self, **kwargs) -> None:
         """Turn the switch off."""
-        self.wemo.set_state(WEMO_FAN_OFF)
+        try:
+            self.wemo.set_state(WEMO_FAN_OFF)
+        except ActionException as err:
+            _LOGGER.warning("Error while turning off device %s. Error: %s",
+                self.name
+                , err,
+            )
+            self._available = False
 
     def set_speed(self, speed: str) -> None:
         """Set the fan_mode of the Humidifier."""
-        self.wemo.set_state(HASS_FAN_SPEED_TO_WEMO.get(speed))
+        try:
+            self.wemo.set_state(HASS_FAN_SPEED_TO_WEMO.get(speed))
+        except ActionException as err:
+            _LOGGER.warning("Error while setting speed of device %s. Error: %s",
+                self.name
+                , err,
+            )
+            self._available = False
 
     def set_humidity(self, humidity: float) -> None:
         """Set the target humidity level for the Humidifier."""
-        if humidity < 50:
-            self.wemo.set_humidity(WEMO_HUMIDITY_45)
-        elif 50 <= humidity < 55:
-            self.wemo.set_humidity(WEMO_HUMIDITY_50)
-        elif 55 <= humidity < 60:
-            self.wemo.set_humidity(WEMO_HUMIDITY_55)
-        elif 60 <= humidity < 100:
-            self.wemo.set_humidity(WEMO_HUMIDITY_60)
-        elif humidity >= 100:
-            self.wemo.set_humidity(WEMO_HUMIDITY_100)
+        try:
+            if humidity < 50:
+                self.wemo.set_humidity(WEMO_HUMIDITY_45)
+            elif 50 <= humidity < 55:
+                self.wemo.set_humidity(WEMO_HUMIDITY_50)
+            elif 55 <= humidity < 60:
+                self.wemo.set_humidity(WEMO_HUMIDITY_55)
+            elif 60 <= humidity < 100:
+                self.wemo.set_humidity(WEMO_HUMIDITY_60)
+            elif humidity >= 100:
+                self.wemo.set_humidity(WEMO_HUMIDITY_100)
+        except ActionException as err:
+            _LOGGER.warning("Error while setting humidity of device %s. Error: %s",
+                self.name
+                , err,
+            )
+            self._available = False
 
     def reset_filter_life(self) -> None:
         """Reset the filter life to 100%."""
-        self.wemo.reset_filter_life()
+        try:
+            self.wemo.reset_filter_life()
+        except ActionException as err:
+            _LOGGER.warning("Error while resetting filter life on device %s. Error: %s",
+                self.name
+                , err,
+            )
+            self._available = False
