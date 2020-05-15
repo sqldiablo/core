@@ -344,6 +344,6 @@ class WemoHumidifier(FanEntity):
         """Reset the filter life to 100%."""
         try:
             self.wemo.reset_filter_life()
-        except ActionException
+        except ActionException:
             _LOGGER.warning("Error while resetting filter life on device: %s.", self.name)
             self._available = False
