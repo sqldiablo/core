@@ -4,8 +4,7 @@ from datetime import timedelta
 import logging
 
 import async_timeout
-import pywemo
-from pywemo import ouimeaux_device.ActionException
+from pywemo.ouimeaux_device import ActionException
 import voluptuous as vol
 
 from homeassistant.components.fan import (
