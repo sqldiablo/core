@@ -291,10 +291,7 @@ class WemoHumidifier(FanEntity):
             if not self._available:
                 _LOGGER.info("Reconnected to %s", self.name)
                 self._available = True
-        except ActionException:
-            _LOGGER.warning("Error while getting state of device %s.", self.name)
-            self._available = False
-        except AttributeError as err:
+        except AttributeError, ActionException as err:
             _LOGGER.warning("Could not update status for %s (%s)", self.name, err)
             self._available = False
 
@@ -305,24 +302,24 @@ class WemoHumidifier(FanEntity):
                 self.wemo.set_state(self._last_fan_on_mode)
             else:
                 self.set_speed(speed)
-        except ActionException:
-            _LOGGER.warning("Error while turning on device %s.", self.name)
+        except ActionException as err:
+            _LOGGER.warning("Error while turning on device %s (%s)", self.name, err)
             self._available = False
 
     def turn_off(self, **kwargs) -> None:
         """Turn the switch off."""
         try:
             self.wemo.set_state(WEMO_FAN_OFF)
-        except ActionException:
-            _LOGGER.warning("Error while turning off device %s.", self.name)
+        except ActionException as err:
+            _LOGGER.warning("Error while turning off device %s (%s)", self.name, err)
             self._available = False
 
     def set_speed(self, speed: str) -> None:
         """Set the fan_mode of the Humidifier."""
         try:
             self.wemo.set_state(HASS_FAN_SPEED_TO_WEMO.get(speed))
-        except ActionException:
-            _LOGGER.warning("Error while setting speed of device %s.", self.name)
+        except ActionException as err:
+            _LOGGER.warning("Error while setting speed of device %s (%s)", self.name, err)
             self._available = False
 
     def set_humidity(self, humidity: float) -> None:
@@ -338,14 +335,14 @@ class WemoHumidifier(FanEntity):
                 self.wemo.set_humidity(WEMO_HUMIDITY_60)
             elif humidity >= 100:
                 self.wemo.set_humidity(WEMO_HUMIDITY_100)
-        except ActionException:
-            _LOGGER.warning("Error while setting humidity of device: %s.", self.name)
+        except ActionException as err:
+            _LOGGER.warning("Error while setting humidity of device: %s (%s)", self.name, err)
             self._available = False
 
     def reset_filter_life(self) -> None:
         """Reset the filter life to 100%."""
         try:
             self.wemo.reset_filter_life()
-        except ActionException:
-            _LOGGER.warning("Error while resetting filter life on device: %s.", self.name)
+        except ActionException as err:
+            _LOGGER.warning("Error while resetting filter life on device: %s (%s)", self.name, err)
             self._available = False
