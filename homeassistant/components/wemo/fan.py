@@ -4,8 +4,9 @@ from datetime import timedelta
 import logging
 
 import async_timeout
-from pywemo.ouimeaux_device.api.service import ActionException
 import voluptuous as vol
+
+from pywemo.ouimeaux_device.api.service import ActionException
 
 from homeassistant.components.fan import (
     SPEED_HIGH,
@@ -202,9 +203,9 @@ class WemoHumidifier(FanEntity):
     def device_info(self):
         """Return the device info."""
         return {
-            "name": self.wemo.name,
-            "identifiers": {(WEMO_DOMAIN, self.wemo.serialnumber)},
-            "model": self.wemo.model_name,
+            "name": self._name,
+            "identifiers": {(WEMO_DOMAIN, self._serialnumber)},
+            "model": self._model_name,
             "manufacturer": "Belkin",
         }
 
@@ -294,6 +295,7 @@ class WemoHumidifier(FanEntity):
         except (AttributeError, ActionException) as err:
             _LOGGER.warning("Could not update status for %s (%s)", self.name, err)
             self._available = False
+            self.wemo.reconnect_with_device()
 
     def turn_on(self, speed: str = None, **kwargs) -> None:
         """Turn the switch on."""
