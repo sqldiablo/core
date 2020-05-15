@@ -297,7 +297,7 @@ class WemoDimmer(LightEntity):
     def name(self):
         """Return the name of the dimmer if any."""
         return self._name
-    
+
     @property
     def device_info(self):
         """Return the device info."""
