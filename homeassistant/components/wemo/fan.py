@@ -4,9 +4,9 @@ from datetime import timedelta
 import logging
 
 import async_timeout
-import voluptuous as vol
-
+import pywemo
 from pywemo import ouimeaux_device.ActionException
+import voluptuous as vol
 
 from homeassistant.components.fan import (
     SPEED_HIGH,
